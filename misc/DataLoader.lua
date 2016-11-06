@@ -1,0 +1,145 @@
+require 'hdf5'
+require 'string'
+
+local utils = require 'misc.utils'
+
+local DataLoader = torch.class('DataLoader')
+
+function DataLoader:__init(opt)
+  -- store settings locally
+  self.batch_size = opt.batch_size
+  self.gpuid = opt.gpuid
+  self.train_size = opt.train_size
+  self.val_size = opt.val_size
+  self.test_size = opt.test_size
+  self.feat_size_text = opt.feat_size_text
+  self.feat_size_factors = opt.feat_size_factors
+
+  -- text
+  -- convert dataset in a tensor, where each row includes the indices 
+  -- of the words of the timeline of each user
+  print('DataLoader loading h5 file (timelines): ', opt.input_h5_text)
+  self.d_txt  = "/timelines"
+  self.h5_file_text = hdf5.open(opt.input_h5_text, 'r')
+  print(self.h5_file_text:read(self.d_txt):dataspaceSize())
+
+  print('DataLoader loading h5 file (factors): ', opt.input_h5_factors)
+  self.d_im  = "/factors"
+  self.h5_file_factors = hdf5.open(opt.input_h5_factors, 'r')
+  print(self.h5_file_factors:read(self.d_im):dataspaceSize())
+
+  -- TODO some sanity checks
+
+  --Initialize indexes 
+  self.split_ix = {}
+  self.iterators = {}
+
+  self:resetIndices('train')
+  self:resetIndices('val')
+  self:resetIndices('test')
+
+  -- TODO print with for
+  print('Assigned to train: ', (#self.split_ix['train'])[1])
+  print('Assigned to val: ', (#self.split_ix['val'])[1])
+  print('Assigned to test: ', (#self.split_ix['test'])[1])
+
+  --pretrained lookup table
+  if opt.use_pretrained_lu > 0 then
+    local preFile = hdf5.open('/home/fbarbieri/deepbio/dataset/lookup.h5', 'r')
+    --self.lookup = torch.Tensor(50000,300)
+    self.lookup = preFile:read('/lookup'):all()
+    print('Loaded lookup: ')
+    print(self.lookup:size())
+  end
+
+end
+
+function DataLoader:resetIndices(split)
+  -- all the indices referes to the original tables (hd5f)
+  local gap
+
+  if split == 'train' then
+    self.split_ix[split] = torch.randperm(self.train_size)
+    elseif split == 'val' then
+      gap = torch.Tensor(self.val_size):fill(self.train_size)
+      self.split_ix[split] = torch.randperm(self.val_size):add(1, gap)
+      elseif split == 'test' then
+        --gap = torch.Tensor(self.test_size):fill(self.train_size+self.val_size)
+        --self.split_ix[split] = torch(self.test_size):add(1, gap)
+        self.split_ix[split] = torch.Tensor(self.test_size)
+      else
+        error('error: unknown split - ' .. split)
+  end
+
+    self.iterators[split] = 1
+end
+
+function DataLoader:getFeatSizeText()
+  return self.feat_size_text
+end
+
+function DataLoader:getFeatSizeFactors()
+  return self.feat_size_factors
+end
+
+function DataLoader:getLookUp()
+  return self.lookup
+end
+
+--[[
+  Split is a string identifier (e.g. train|val|test)
+  Returns a batch of data:
+  - ...
+  - ...
+--]]
+function DataLoader:getBatch(split)
+  
+  local split_ix = self.split_ix[split]
+
+  local batch_size = self.batch_size
+
+  assert(split_ix, 'split ' .. split .. ' not found.')
+
+  -- initialize one table per modality
+  local text_batch = torch.FloatTensor(batch_size, self.feat_size_text):fill(0)
+  local factors_batch = torch.FloatTensor(batch_size, self.feat_size_factors):fill(0)
+  local labels_batch = torch.FloatTensor(batch_size):fill(1)
+
+
+  local max_index = (#split_ix)[1]
+
+  --if you are going to overflow, reset the indices 
+  --(i know we are not processing some examples at the end, but they are random every time so it shouldn't harm)
+  future_index = self.iterators[split] + batch_size
+  if future_index >= max_index then
+    self:resetIndices(split)
+  end
+
+  local si = self.iterators[split] -- use si for semplicity but update the self.iterator later
+
+  for i = 1,self.batch_size do
+    ix = split_ix[si]
+    assert(ix ~= nil, 'bug: split ' .. split .. ' was accessed out of bounds with ' .. si)
+    -- positive examples
+
+    -- read text and factors vectors (read line at position ix)
+    text_batch[i] = self.h5_file_text:read(self.d_txt):partial({ix,ix},{1,self.feat_size_text})
+    factors_batch[i] = self.h5_file_factors:read(self.d_im):partial({ix,ix},{1,self.feat_size_factors})
+    si = si + 1
+  end
+  self.iterators[split] = si
+
+  local data = {}
+  if self.gpuid<0 then
+    data.text = text_batch
+    data.factors = factors_batch
+    data.labels = labels_batch
+  else
+    data.text = text_batch:cuda()
+    data.factors = factors_batch:cuda()
+    data.labels = labels_batch:cuda()
+  end
+
+  return data
+
+end
