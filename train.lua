@@ -52,7 +52,7 @@ cmd:option('-dropouts', '{0.1, 0.1}', 'Dropout on hidden representations.')
 
 -- Optimization: General
 cmd:option('-max_iters', -1, 'max number of iterations to run for (-1 = run forever)')
-cmd:option('-batch_size',200,'what is the batch size in number of images per batch')
+cmd:option('-batch_size',100,'what is the batch size in number of images per batch')
 cmd:option('-batch_size_real',-1,'TODO REMOVE FROM HERE!!! real value of the batch with the negative examples')
 cmd:option('-neg_samples',1,'number of negative examples for each good example')
 cmd:option('-grad_clip',0.1,'clip gradients at this value (note should be lower than usual 5 because we normalize grads by both batch and seq_length)')
@@ -123,11 +123,7 @@ local protos = {}
 --print(string.format('Parameters are model=%s feat_size=%d, output_size=%d\n',opt.model, feat_size,output_size))
 -- create protos from scratch
 if opt.model == 'simple' then 
-  --protos.model = model1.model(opt, opt.vocab_size, opt.embedding_dim, opt.feat_size_visual, opt.num_layers, opt.hidden_size, opt.output_size, opt.dropout, lu)
-  --protos.model = model1.model(feat_size_text, feat_size_factors, opt.num_layers, opt.hidden_size)
   protos.model = model1.model(opt)
-  --elseif opt.model == 'someOtherModel' then
-  --protos.model = ...
   else
     print(string.format('Wrong model:%s',opt.model))
   end
@@ -143,24 +139,10 @@ end
 
 -- flatten and prepare all model parameters to a single vector. 
 local params, grad_params = protos.model:getParameters()
---params:uniform(-0.08, 0.08) 
 print('total number of parameters in model: ', params:nElement())
 assert(params:nElement() == grad_params:nElement())
 
---parameters to regularize
---reg=protos.model.forwardnodes[5].data.module.weight --Linear mapping
---reg = {}
---[[
-reg[1] = protos.model.forwardnodes[5].data.module.weight --Linear mapping
-reg[2] = protos.model.forwardnodes[5].data.module.bias
-reg[3] = protos.model.forwardnodes[13].data.module.weight --hidden for XOR
-reg[4] = protos.model.forwardnodes[13].data.module.bias
-reg[5] = protos.model.forwardnodes[16].data.module.weight -- decision
-reg[6] = protos.model.forwardnodes[16].data.module.bias
---]]
-
 collectgarbage()
-
 
 -------------------------------------------------------------------------------
 -- forward test set and save to file TODO
@@ -305,12 +287,7 @@ while true do
 
     local timer = torch.Timer()
 
-    -- eval loss/gradient
     local losses = lossFun()
-    --if iter % opt.losses_log_every == 0 then 
-    --  loss_history[iter] = losses 
-      -- print(string.format('train loss - iter %d: %f', iter, losses))
-    --end
 
     local time = timer:time().real
     local timeTot = timerTot:time().real  
@@ -365,17 +342,6 @@ while true do
       --local combined_rank = rtext + rvisual
       local sim = eval('val')
       
-      --revert parameters if you didnt learn the validation better then before
-      --if combined_rank > best_sim then
-      -- if opt.revert_params >= 1 then
-      --    params = old_params
-      --  end
-      --else
-      --  print('Params not reverted')
-      --  best_sim = combined_rank
-      --  old_params = params
-      --end
-
       if sim > best_sim then
         best_sim = sim
 
@@ -387,8 +353,6 @@ while true do
       end
 
       local epoch = iter*opt.batch_size / opt.train_size
-      --print(string.format('e:%.2f (i:%d) train/val loss: %f/%f  text/visual rank: %.0f(%d)/%.0f(%d) BC:%d sim: %f  batch/total time: %.4f / %.0f', epoch, iter, losses, eval_split('val'), rtext, top5t, rvisual, top5v, best_sim, sim, time, timeTot/60))
-      --print(string.format("lr= %6.4e grad norm = %6.4e, param norm = %6.4e, grad/param norm = %6.4e", learning_rate, grad_params:norm(), params:norm(), grad_params:norm() / params:norm()))
       print(string.format('e:%.2f (i:%d) train/val loss: %f/%f sim: %f  bestSim: %f batch/total time: %.4f / %.0f', epoch, iter, losses, losses, sim, best_sim, time, timeTot/60)) --eval_split('val')
       print(string.format("lr= %6.4e grad norm = %6.4e, param norm = %6.4e, grad/param norm = %6.4e", learning_rate, grad_params:norm(), params:norm(), grad_params:norm() / params:norm()))
     end
