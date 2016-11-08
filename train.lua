@@ -21,6 +21,7 @@ cmd:text('Options')
 -- Data input settings
 --cmd:option('-input_json','../../mmtwitter/dataset/info250k.json','path to the json file containing users informations')
 cmd:option('-input_h5_text','../../deepbio/dataset/timelines_train.h5','path to the user tensors')
+cmd:option('-input_h5_text_test','../../deepbio/dataset/timelines_test.h5','path to the user tensors - test set')
 cmd:option('-input_h5_factors','../../deepbio/dataset/factors_train.h5','path to gold factors')
 
 --cmd:option('-input_h5_visual','../../mmtwitter/dataset/visual250k.h5','path to the h5file containing the preprocessed dataset (visual)')
@@ -36,7 +37,7 @@ cmd:option('-feat_size_factors',200,'Max number of words per timeline (defined i
 cmd:option('-model','simple','What model to use')
 cmd:option('-use_pretrained_lu',1,'Use pretrained embedding or not')
 cmd:option('-crit','cosine','What criterion to use (only cosine so far)')
-cmd:option('-margin',0,'Negative samples margin: L = max(0, cos(x1, x2) - margin)')
+cmd:option('-margin',0.5,'Negative samples margin: L = max(0, cos(x1, x2) - margin)')
 cmd:option('-num_layers', 1, 'number of hidden layers')
 cmd:option('-hidden_size',300,'The size of the hidden layer')
 cmd:option('-output_size',200,'The  dimension of the output vector')
@@ -61,7 +62,7 @@ cmd:option('-dropout', -1, 'strength of dropout in the model')
 cmd:option('-optim','adam','what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
 
 cmd:option('-learning_rate_decay_every', -1, 'every how many iterations LR decay')
-cmd:option('-learning_rate',1e-4,'learning rate')
+cmd:option('-learning_rate',0.0001,'learning rate')
 cmd:option('-learning_rate_decay',0.97,'learning rate decay')
 
 cmd:option('-optim_alpha',0.1,'alpha for adagrad|rmsprop|momentum|adam')
@@ -72,17 +73,17 @@ cmd:option('-weight_decay',0,'Weight decay for L2 norm')
 -- Evaluation/Checkpointing
 cmd:option('-train_size', 21113, 'how many users to use for training set') --tot: 22113
 cmd:option('-val_size', 1000, 'how many users to use for validation set')
-cmd:option('-test_size', 22113, 'how many users to use for the testing (the whole dataset to do some train eval. too)')
+cmd:option('-test_size', 5528, 'how many users to use for the testing (the whole dataset to do some train eval. too)')
 cmd:option('-save_checkpoint_every', 10000, 'how often to save a model checkpoint?')
 cmd:option('-checkpoint_path', 'cp/', 'folder to save checkpoints into (empty = this folder)')
-cmd:option('-output_path', '../../mmtwitter/out/', 'folder to save output vectors')
-cmd:option('-save_output', -1, 'save if > 0 and > combined_rank')
+cmd:option('-output_path', '/home/fbarbieri/deepbio/out/', 'folder to save output vectors')
+cmd:option('-save_output', -1, 'save if > save_output and > bestCosine')
 cmd:option('-beta',1,'beta for f_x')
 -- misc
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')
 cmd:option('-seed', 123, 'random number generator seed to use')
 cmd:option('-gpuid', 0, 'which gpu to use. -1 = use CPU')
-cmd:option('-print_every',100,'Print some statistics')
+cmd:option('-print_every',500,'Print some statistics')
 cmd:option('-revert_params',-1,'Reverst parameters if you are doing worse on the validation (in the last print_every*batch_size) elements')
 cmd:text()
 
@@ -114,7 +115,7 @@ local feat_size_text = loader:getFeatSizeText()
 local feat_size_factors = loader:getFeatSizeFactors()
 local lu = nil
 if opt.use_pretrained_lu > 0  then lu = loader:getLookUp() end
-
+best_sim = 0 --using as global (also needed in save_output)
 -------------------------------------------------------------------------------
 -- Initialize the network
 -------------------------------------------------------------------------------
@@ -145,54 +146,45 @@ assert(params:nElement() == grad_params:nElement())
 collectgarbage()
 
 -------------------------------------------------------------------------------
--- forward test set and save to file TODO
+-- forward test set and save to file
 -------------------------------------------------------------------------------
 local function save_output_vectors()
   protos.model:evaluate()
+  loader:resetIndices('test')
 
-  local maxIter = torch.floor(opt.test_size / opt.batch_size) 
-  local test_size_real = maxIter * opt.batch_size
-
+  local maxIter = torch.floor(opt.test_size / 8)
+  local test_size_real = maxIter * 8
   -- initialize one table per modality
-  local text_out = torch.FloatTensor(test_size_real, opt.output_size)
-  local visual_out = torch.FloatTensor(test_size_real, opt.output_size)
+  text_out = torch.FloatTensor(test_size_real, opt.output_size)
+
   i = 1
   for _ = 1,maxIter do
     -- forward
-    local data = loader:getBatch('test',false) --without negative samples
-    local input = {}
-    table.insert(input,data.text)
-    table.insert(input,data.visual)
-    local output = protos.model:forward(input)
-    
-    -- fill the out matrixes with the batch outputs
-    local text_out_batch = output[1]
-    local visual_out_batch = output[2]
-    for j = 1,opt.batch_size do
-      text_out[i] = text_out_batch[j]:float()     -- convert to normal tensors
-      visual_out[i] = visual_out_batch[j]:float()
+    local data = loader:getBatch_test()
+    local text_out_batch = protos.model:forward(data.text)
+    for j = 1,8 do
+      text_out[i] = text_out_batch[j]:float()
       i = i + 1
     end
   end
 
   --save h5
-  local myFile = hdf5.open(opt.output_path .. 'text_' .. opt.test_size .. '.h5', 'w')
-  myFile:write('/tweets', text_out)
-  myFile:close()
-  myFile = hdf5.open(opt.output_path .. 'visual_' .. opt.test_size .. '.h5', 'w')
-  myFile:write('/images', visual_out)
+  local myFile = hdf5.open(opt.output_path .. 'factors_' .. best_sim .. '.h5', 'w')
+  myFile:write('/factors', text_out)
   myFile:close()
 
 end
 
 ------------------------------------
--- Evaluate Ranking (two modalities)
+-- Evaluate on validation set
 ------------------------------------
 local function eval()
   protos.model:evaluate()
+  loader:resetIndices('val')
 
   local maxIter = torch.floor(opt.val_size / opt.batch_size)
   local val_size_real = maxIter * opt.batch_size
+  local val_loss = 0
 
   -- initialize one table per modality
   if opt.gpuid<0 then
@@ -215,6 +207,14 @@ local function eval()
       factors_out[i] = data.factors[j]
       i = i + 1
     end
+
+    local output = {}
+    table.insert(output,text_out_batch)
+    table.insert(output,data.factors)
+    local labels = data.labels
+    local loss = protos.criterion:forward(output, labels)
+    local batch_loss = protos.criterion:forward(output, labels)
+    val_loss = val_loss + batch_loss
   end
 
   -- normalize
@@ -231,9 +231,8 @@ local function eval()
   -- trace
   local sim = cosine:float():trace() / cosine:size(1) 
 
-  return sim
+  return sim, val_loss/val_size_real --we do not average
 end
-
 
 -------------------------------------------------------------------------------
 -- Loss function
@@ -264,7 +263,7 @@ local function lossFun()
   -- backprop to  model
   local dummy = protos.model:backward(data.text, dpredicted[1])
 
-  return loss / opt.batch_size_real
+  return loss / opt.batch_size
 end
 
 -------------------------------------------------------------------------------
@@ -277,7 +276,6 @@ local cnn_optim_state = {}
 local loss_history = {}
 local val_acc_history = {}
 local val_prop_acc_history = {}
-local best_sim = 0
 local old_params
 local checkpoint_path = opt.checkpoint_path .. 'cp_id' .. opt.id ..'.cp'
 local learning_rate = opt.learning_rate
@@ -340,20 +338,20 @@ while true do
     if iter % opt.print_every == 0 then 
       --local rtext, rvisual, top5t, top5v, sim = eval_ranking()
       --local combined_rank = rtext + rvisual
-      local sim = eval('val')
+      local sim, val_loss = eval('val')
       
       if sim > best_sim then
         best_sim = sim
 
         -- save output vectors (forward test set)
-        if opt.save_output > 0 and sim > save_output then --iter > 200 then 
+        if opt.save_output > 0 and sim > opt.save_output then --iter > 200 then 
           print('Found better model! Saving h5...')
           save_output_vectors()
         end
       end
 
       local epoch = iter*opt.batch_size / opt.train_size
-      print(string.format('e:%.2f (i:%d) train/val loss: %f/%f sim: %f  bestSim: %f batch/total time: %.4f / %.0f', epoch, iter, losses, losses, sim, best_sim, time, timeTot/60)) --eval_split('val')
+      print(string.format('e:%.2f (i:%d) train/val loss: %f/%f sim: %f  bestSim: %f batch/total time: %.4f / %.0f', epoch, iter, losses, val_loss, sim, best_sim, time, timeTot/60)) --eval_split('val')
       print(string.format("lr= %6.4e grad norm = %6.4e, param norm = %6.4e, grad/param norm = %6.4e", learning_rate, grad_params:norm(), params:norm(), grad_params:norm() / params:norm()))
     end
 

@@ -103,8 +103,8 @@ function DataLoader:getBatch(split)
   local split_ix = self.split_ix[split]
   local batch_size = self.batch_size
 
-  local neg_samples = false
-  if split == 'train' then neg_samples = true end
+  local negSamples = false
+  --if split == 'train' then negSamples = true end
 
   -- initialize one table per modality
   local text_batch = torch.FloatTensor(batch_size, self.feat_size_text):fill(0)
@@ -121,35 +121,14 @@ function DataLoader:getBatch(split)
   end
 
   local si = self.iterators[split] -- use si for semplicity but update the self.iterator later
-  local i = 1
-  local loop_size = batch_size
-  if neg_samples then loop_size = batch_size / 2 end --as we add 1 negative sample each good example
 
-  for _ = 1,loop_size do
+  for i = 1,self.batch_size do
     ix = split_ix[si]
     assert(ix ~= nil, 'bug: split ' .. split .. ' was accessed out of bounds with ' .. si)
 
     -- read text and factors vectors (read line at position ix)
     text_batch[i] = self.h5_file_text:read(self.d_txt):partial({ix,ix},{1,self.feat_size_text})
     factors_batch[i] = self.h5_file_factors:read(self.d_im):partial({ix,ix},{1,self.feat_size_factors})
-    labels_batch[i] = 1
-    i = i+1
-
-    -- negative examples
-    if neg_samples then
-      --get random example (verify it's not the same as the positive)
-      local rand_ix = ix
-      while rand_ix == ix do
-        rand_ix = math.random(self.train_size) 
-      end
-
-      -- add negative sample
-      text_batch[i] = self.h5_file_text:read(self.d_txt):partial({ix,ix},{1,self.feat_size_text})
-      factors_batch[i] = self.h5_file_factors:read(self.d_im):partial({rand_ix,rand_ix},{1,self.feat_size_factors})
-      labels_batch[i] = 1
-      i = i+1
-    end
-
     si = si + 1
   end
   self.iterators[split] = si
