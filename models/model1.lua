@@ -5,7 +5,7 @@ require 'misc.Peek'
 require 'hdf5'
 --require 'misc.LinearNB
 local model1 = {}
-function model1.model(opt)
+function model1.model(opt,embeddings)
 
   -- language part
   local language_part = nn.Sequential()

@@ -6,7 +6,8 @@ require 'hdf5'
 local utils = require 'misc.utils'
 require 'misc.DataLoader'
 require 'misc.optim_updates'
-local model1 = require 'models.model1'
+--local model1 = require 'models.model1'
+local model1 = require 'models.model2'
 --local model1 = require 'models.model1-lstms'
 
 -------------------------------------------------------------------------------
@@ -83,7 +84,7 @@ cmd:option('-beta',1,'beta for f_x')
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')
 cmd:option('-seed', 123, 'random number generator seed to use')
 cmd:option('-gpuid', 0, 'which gpu to use. -1 = use CPU')
-cmd:option('-print_every',500,'Print some statistics')
+cmd:option('-print_every',100,'Print some statistics')
 cmd:option('-revert_params',-1,'Reverst parameters if you are doing worse on the validation (in the last print_every*batch_size) elements')
 cmd:text()
 
@@ -124,7 +125,8 @@ local protos = {}
 --print(string.format('Parameters are model=%s feat_size=%d, output_size=%d\n',opt.model, feat_size,output_size))
 -- create protos from scratch
 if opt.model == 'simple' then 
-  protos.model = model1.model(opt,lu)
+  protos.model = model1.model(opt,lu,lu)
+  print(protos.model)
   else
     print(string.format('Wrong model:%s',opt.model))
   end

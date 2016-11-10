@@ -45,19 +45,7 @@ function model1.model(opt, vocab_size, embedding_dim, feat_size_visual, num_laye
   language_part:add(nn.Linear(inputSize,output_size))
   language_part:add(nn.ReLU(true))
 
-  -- visual part
-  local visual_part = nn.Sequential()
-  visual_part:add(nn.Linear(feat_size_visual,output_size))
-  visual_part:add(nn.ReLU(true))
-
-  -------- MM NET ---------
-  -- 2 input 2 output
-  local net = nn.ParallelTable()
-  net:add(language_part)
-  net:add(visual_part)
-  --net:add(nn.Peek()) --PEEEEEEEK
-
-  return net
+  return language_part
 end 
 return model1
 
