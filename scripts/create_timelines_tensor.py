@@ -5,14 +5,15 @@ import h5py
 import pickle
 import string
 
-vocab_length = 100000
-max_timeline_word = 800
-dataset = 'test' # test or train
+vocab_length = 200000 #150000 #100000
+max_timeline_word = 800 #800 #600 
+dataset = 'train' # test or train
+data = "" #"_entities"
 
 if 'train' in dataset:
-	timelines = open("/home/fbarbieri/deepbio/dataset/timelines_train.txt", 'r').read().strip().split("\n")
-	h5_file = "/home/fbarbieri/deepbio/dataset/timelines_train.h5"
-	w2i_file = "/home/fbarbieri/deepbio/dataset/w2i_train.p"
+	timelines = open("/home/fbarbieri/deepbio/dataset/timelines_train"+data+".txt", 'r').read().strip().split("\n")
+	h5_file = "/home/fbarbieri/deepbio/dataset/timelines_train"+data+".h5"
+	w2i_file = "/home/fbarbieri/deepbio/dataset/w2i_train"+data+".p"
 	#timelines = open("/home/fbarbieri/mmtwitter/dataset/tmp.txt", 'r').read().strip().split("\n")
 	#create vocabulary
 	c = Counter()
@@ -27,12 +28,12 @@ if 'train' in dataset:
 	print "Vocabulary (100 most uncommon):"
 	print vocab[vocab_length-100:vocab_length]
 	print "Saving vocabulary..."
-	pickle.dump(vocab, open("/home/fbarbieri/deepbio/dataset/vocab.p","wb"))
+	pickle.dump(vocab, open("/home/fbarbieri/deepbio/dataset/vocab"+data+".p","wb"))
 elif 'test' in dataset:
-	vocab = pickle.load(open("/home/fbarbieri/deepbio/dataset/vocab.p", "rb"))
-	timelines = open("/home/fbarbieri/deepbio/dataset/timelines_test.txt", 'r').read().strip().split("\n")
-	h5_file = "/home/fbarbieri/deepbio/dataset/timelines_test.h5"
-	w2i_file = "/home/fbarbieri/deepbio/dataset/w2i_test.p"
+	vocab = pickle.load(open("/home/fbarbieri/deepbio/dataset/vocab"+data+".p", "rb"))
+	timelines = open("/home/fbarbieri/deepbio/dataset/timelines_test"+data+".txt", 'r').read().strip().split("\n")
+	h5_file = "/home/fbarbieri/deepbio/dataset/timelines_test"+data+".h5"
+	w2i_file = "/home/fbarbieri/deepbio/dataset/w2i_test"+data+".p"
 
 w2i = {w:i for i,w in enumerate(vocab,1)} #start from 1 cause 0 is the padding value
 

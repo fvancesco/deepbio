@@ -1,4 +1,5 @@
 require 'nn' 
+require 'nn' 
 --require 'nngraph'
 require 'misc.Peek'
 --require 'models.MyLookupTable'
@@ -15,6 +16,7 @@ function model1.model(opt,embeddings)
     print('Loaded pretrained embeddings')
   end
   language_part:add(pretrainedLU)
+  if opt.dropout > 0 then language_part:add(nn.Dropout(opt.dropout)) end
   language_part:add(nn.Mean(2))
   --language_part:add(nn.Max(2))
   --language_part:add(nn.Linear(opt.embedding_dim,1000))
@@ -24,8 +26,7 @@ function model1.model(opt,embeddings)
   --language_part:add(nn.Linear(2000,opt.output_size))
   language_part:add(nn.Linear(opt.embedding_dim,opt.output_size))
   language_part:add(nn.Tanh())
-  if opt.dropout > 0 then language_part:add(nn.Dropout(opt.dropout)) end
-
+  --if opt.dropout > 0 then language_part:add(nn.Dropout(opt.dropout)) end
   return language_part
 end 
 return model1

@@ -51,11 +51,17 @@ function DataLoader:__init(opt)
 
   --pretrained lookup table
   if opt.use_pretrained_lu > 0 then
-    local preFile = hdf5.open('/home/fbarbieri/deepbio/dataset/lookup.h5', 'r')
-    --self.lookup = torch.Tensor(50000,300)
+    local preFile = hdf5.open(opt.lookup_file, 'r')
     self.lookup = preFile:read('/lookup'):all()
     print('Loaded lookup: ')
     print(self.lookup:size())
+
+    if opt.tfidf_file ~= nil then --NOTSURRRREEEEEEE TODO, maybe move to train3.lua so we dont need new dataloader
+      preFile = hdf5.open(opt.tfidf_file, 'r')
+      self.tfidf = preFile:read('/lookup'):all()
+      print('Loaded tfidf: ')
+      print(self.tfidf:size())
+    end
   end
 
 end
@@ -92,19 +98,20 @@ function DataLoader:getLookUp()
   return self.lookup
 end
 
+function DataLoader:getTfidf()
+  return self.tfidf
+end
+
 --[[
   Split is a string identifier (e.g. train|val|test)
   Returns a batch of data:
   - ...
   - ...
 --]]
-function DataLoader:getBatch(split)
+function DataLoader:getBatch(split,neg_samples)
   
   local split_ix = self.split_ix[split]
   local batch_size = self.batch_size
-
-  local neg_samples = false
-  if split == 'train' then neg_samples = true end
 
   -- initialize one table per modality
   local text_batch = torch.FloatTensor(batch_size, self.feat_size_text):fill(0)

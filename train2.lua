@@ -39,6 +39,7 @@ cmd:option('-model','simple','What model to use')
 cmd:option('-use_pretrained_lu',1,'Use pretrained embedding or not')
 cmd:option('-crit','cosine','What criterion to use (only cosine so far)')
 cmd:option('-margin',0.5,'Negative samples margin: L = max(0, cos(x1, x2) - margin)')
+cmd:option('-neg_samples',false,'number of negative examples for each good example')
 cmd:option('-num_layers', 1, 'number of hidden layers')
 cmd:option('-hidden_size',300,'The size of the hidden layer')
 cmd:option('-output_size',200,'The  dimension of the output vector')
@@ -56,7 +57,6 @@ cmd:option('-dropouts', '{0.1, 0.1}', 'Dropout on hidden representations.')
 cmd:option('-max_iters', -1, 'max number of iterations to run for (-1 = run forever)')
 cmd:option('-batch_size',100,'what is the batch size in number of images per batch')
 cmd:option('-batch_size_real',-1,'TODO REMOVE FROM HERE!!! real value of the batch with the negative examples')
-cmd:option('-neg_samples',1,'number of negative examples for each good example')
 cmd:option('-grad_clip',0.1,'clip gradients at this value (note should be lower than usual 5 because we normalize grads by both batch and seq_length)')
 -- Optimization: for the model
 cmd:option('-dropout', -1, 'strength of dropout in the model')
@@ -84,7 +84,7 @@ cmd:option('-beta',1,'beta for f_x')
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')
 cmd:option('-seed', 123, 'random number generator seed to use')
 cmd:option('-gpuid', 0, 'which gpu to use. -1 = use CPU')
-cmd:option('-print_every',100,'Print some statistics')
+cmd:option('-print_every',200,'Print some statistics')
 cmd:option('-revert_params',-1,'Reverst parameters if you are doing worse on the validation (in the last print_every*batch_size) elements')
 cmd:text()
 
@@ -200,7 +200,7 @@ local function eval()
   i = 1
   for _ = 1,maxIter do
     -- forward
-    local data = loader:getBatch('val')
+    local data = loader:getBatch('val',neg_samples)
     local text_out_batch = protos.model:forward(data.text)
 
     for j = 1,opt.batch_size do
@@ -247,7 +247,7 @@ local function lossFun()
   -- Forward pass
   -----------------------------------------------------------------------------
   -- get batch of data
-  local data = loader:getBatch('train')
+  local data = loader:getBatch('train',neg_samples)
 
   -- get predicted ({text,visual})
   local output_lm = protos.model:forward(data.text)
