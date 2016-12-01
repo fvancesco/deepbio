@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -N TorchMul4
+#$ -N TorchMul8
 #$ -cwd
 #$ -e $HOME/logs/$JOB_NAME-$JOB_ID.err
 #$ -o $HOME/logs/$JOB_NAME-$JOB_ID.out
@@ -20,9 +20,9 @@ export PROTOBUF_INCLUDE_DIR="/usr/include/google/protobuf"
 ########
 
 cd /homedtic/fbarbieri/git/deepbio
-th train1.lua -learning_rate 0.001 -hidden_size 100000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
+th train1.lua -learning_rate 0.0001 -hidden_size 100000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
 sleep 1
-th train1.lua -learning_rate 0.001 -hidden_size 200000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
+th train1.lua -learning_rate 0.00001 -hidden_size 200000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
 
 wait
 echo "Done with 08"
