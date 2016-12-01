@@ -48,7 +48,7 @@ cmd:option('-crit','cosine','What criterion to use (only cosine so far)')
 cmd:option('-margin',0.5,'Negative samples margin: L = max(0, cos(x1, x2) - margin)')
 cmd:option('-neg_samples',true,'number of negative examples for each good example')
 cmd:option('-num_layers', 1, 'number of hidden layers')
-cmd:option('-hidden_size',300,'The size of the hidden layer')
+cmd:option('-hidden_size',5000,'The size of the hidden layer')
 cmd:option('-output_size',200,'The  dimension of the output vector')
 
 --LSTM
@@ -62,7 +62,7 @@ cmd:option('-dropouts', '{0.1, 0.1}', 'Dropout on hidden representations.')
 
 -- Optimization: General
 cmd:option('-max_iters', -1, 'max number of iterations to run for (-1 = run forever)')
-cmd:option('-batch_size',50,'what is the batch size in number of images per batch')
+cmd:option('-batch_size',200,'what is the batch size in number of images per batch')
 cmd:option('-batch_size_real',-1,'TODO REMOVE FROM HERE!!! real value of the batch with the negative examples')
 -- Optimization: for the model
 cmd:option('-dropout', -1, 'strength of dropout in the model')
