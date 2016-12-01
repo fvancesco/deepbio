@@ -23,16 +23,20 @@ cmd:text('Options')
 --cmd:option('-input_h5_text','../../deepbio/dataset/timelines_train.h5','path to the user tensors')
 --cmd:option('-input_h5_text_test','../../deepbio/dataset/timelines_test.h5','path to the user tensors - test set')
 --cmd:option('-lookup_file','../../deepbio/dataset/lookup.h5','path to gold factors')
---entities (babelnet)
-cmd:option('-input_h5_text','../../deepbio/dataset/timelines_train_entities.h5','path to the user tensors')
-cmd:option('-input_h5_text_test','../../deepbio/dataset/timelines_test_entities.h5','path to the user tensors - test set')
-cmd:option('-lookup_file','../../deepbio/dataset/lookup_entities.h5','path to gold factors')
 
-cmd:option('-input_h5_factors','../../deepbio/dataset/factors_train.h5','path to gold factors we want to learn')
+--cmd:option('-input_h5_text','../../deepbio/dataset/timelines_train_entities.h5','path to the user tensors')
+--cmd:option('-input_h5_text_test','../../deepbio/dataset/timelines_test_entities.h5','path to the user tensors - test set')
+--cmd:option('-lookup_file','../../deepbio/dataset/lookup_entities.h5','path to gold factors')
+
+cmd:option('-input_h5_text','../../deepbio/dataset/lfma/timelines_train.h5','path to the user tensors')
+cmd:option('-input_h5_text_test','../../deepbio/dataset/lfma/timelines_test.h5','path to the user tensors - test set')
+cmd:option('-lookup_file','../../deepbio/dataset/lfma/lookup.h5','path to gold factors')
+
+cmd:option('-input_h5_factors','../../deepbio/dataset/lfma/factors_train.h5','path to gold factors we want to learn')
 
 cmd:option('-embedding_dim',300,'Pretrained Embedding size (dim of the lookup table)')
-cmd:option('-vocab_size',150000,'Size of the vcabulary (defined in the script create_tensor_timeline.py)')
-cmd:option('-feat_size_text',600,'normal:800-entities:600 Max number of words per timeline (defined in the script create_tensor_timeline.py)')
+cmd:option('-vocab_size',200000,'Size of the vcabulary (defined in the script create_tensor_timeline.py)')
+cmd:option('-feat_size_text',800,'normal:800-entities:600 Max number of words per timeline (defined in the script create_tensor_timeline.py)')
 cmd:option('-feat_size_factors',200,'Max number of words per timeline (defined in the script create_tensor_timeline.py)')
 
 --cmd:option('-feat_size_visual',4096,'The number of visual features')
@@ -58,9 +62,8 @@ cmd:option('-dropouts', '{0.1, 0.1}', 'Dropout on hidden representations.')
 
 -- Optimization: General
 cmd:option('-max_iters', -1, 'max number of iterations to run for (-1 = run forever)')
-cmd:option('-batch_size',100,'what is the batch size in number of images per batch')
+cmd:option('-batch_size',50,'what is the batch size in number of images per batch')
 cmd:option('-batch_size_real',-1,'TODO REMOVE FROM HERE!!! real value of the batch with the negative examples')
-cmd:option('-grad_clip',0.1,'clip gradients at this value (note should be lower than usual 5 because we normalize grads by both batch and seq_length)')
 -- Optimization: for the model
 cmd:option('-dropout', -1, 'strength of dropout in the model')
 cmd:option('-optim','adam','what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
@@ -75,9 +78,9 @@ cmd:option('-optim_epsilon',1e-8,'epsilon that goes into denominator for smoothi
 cmd:option('-weight_decay',0,'Weight decay for L2 norm')
 
 -- Evaluation/Checkpointing
-cmd:option('-train_size', 21113, 'how many users to use for training set') --tot: 22113
+cmd:option('-train_size', 198957, 'how many users to use for training set') --tot: 22113, 199957-1000
 cmd:option('-val_size', 1000, 'how many users to use for validation set')
-cmd:option('-test_size', 5528, 'how many users to use for the testing (the whole dataset to do some train eval. too)')
+cmd:option('-test_size', 49988, 'how many users to use for the testing') --5528
 cmd:option('-save_checkpoint_every', 10000, 'how often to save a model checkpoint?')
 cmd:option('-checkpoint_path', 'cp/', 'folder to save checkpoints into (empty = this folder)')
 cmd:option('-output_path', '/home/fbarbieri/deepbio/out/', 'folder to save output vectors')
