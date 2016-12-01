@@ -7,8 +7,8 @@ import h5py
 
 
 print "loading i2w..."
-i2w = pickle.load(open( "/home/fbarbieri/deepbio/dataset/i2w_tfidf.p", "rb" ))
-w2tfidf = pickle.load(open( "/home/fbarbieri/deepbio/dataset/w2tfidf.p", "rb" ))
+i2w = pickle.load(open( "/home/fbarbieri/deepbio/dataset/lfma/i2w_tfidf.p", "rb" ))
+w2tfidf = pickle.load(open( "/home/fbarbieri/deepbio/dataset/lfma/w2tfidf.p", "rb" ))
 #create tfidf table
 i2w_size = len(i2w)
 embedding_size = 1
@@ -27,7 +27,7 @@ for i in range(i2w_size):
 
 print 'didnt find ' + str(didntfind) + ' of ' + str(i2w_size)
 print "Saving..."
-with h5py.File('/home/fbarbieri/deepbio/dataset/tfidf.h5', 'w') as hf:
+with h5py.File('/home/fbarbieri/deepbio/dataset/lfma/tfidf.h5', 'w') as hf:
 	hf.create_dataset('lookup', data=lookup)
 
 #create lookup table
@@ -49,7 +49,7 @@ for i in range(i2w_size):
 print 'didnt find ' + str(didntfind) + ' of ' + str(i2w_size)
 
 print "Saving..."
-with h5py.File('/home/fbarbieri/deepbio/dataset/lookup_tfidf.h5', 'w') as hf:
+with h5py.File('/home/fbarbieri/deepbio/dataset/lfma/lookup_tfidf.h5', 'w') as hf:
 	hf.create_dataset('lookup', data=lookup)
 
 print "Stai senza pensieri."

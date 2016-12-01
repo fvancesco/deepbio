@@ -3,7 +3,7 @@
 #$ -cwd
 #$ -e $HOME/logs/$JOB_NAME-$JOB_ID.err
 #$ -o $HOME/logs/$JOB_NAME-$JOB_ID.out
-#$ -l h=node04
+#$ -l h=node08
 #$ -l gpu=1
 #$ -q default.q
 
@@ -20,16 +20,10 @@ export PROTOBUF_INCLUDE_DIR="/usr/include/google/protobuf"
 ########
 
 cd /homedtic/fbarbieri/git/deepbio
-th train1.lua -hidden_size 100000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
-sleep 1
 th train1.lua -learning_rate 0.001 -hidden_size 100000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
 sleep 1
-th train1.lua -learning_rate 0.01 -hidden_size 100000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
-#th train_hpc.lua -val_size 2000 -hidden_size 3000 -print_start 15 -save_output 990 > ~/mmtwitter_old/logs/relu_pre_$(date +%Y_%m_%d_%H_%M_%S) &
-#sleep 1
-#th train_hpc.lua -val_size 2000 -hidden_size 9000 -print_start 15 -save_output 990 > ~/mmtwitter_old/logs/relu_pre_$(date +%Y_%m_%d_%H_%M_%S) &
-
+th train1.lua -learning_rate 0.001 -hidden_size 200000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
 
 wait
-echo "Done with 04"
+echo "Done with 08"
 

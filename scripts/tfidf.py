@@ -10,11 +10,11 @@ import string, re
 
 vocab_length = 200000 #150000 #100000
 max_timeline_word = 800 #800 #600 
-dataset = 'test' # test or train
+dataset = 'train' # test or train
 data = "_tfidf" #"_entities"
-i2w_file = "/home/fbarbieri/deepbio/dataset/i2w"+data+".p"
-w2i_file = "/home/fbarbieri/deepbio/dataset/w2i"+data+".p"
-w2tfidf_file = "/home/fbarbieri/deepbio/dataset/w2tfidf.p"
+i2w_file = "/home/fbarbieri/deepbio/dataset/lfma/i2w"+data+".p"
+w2i_file = "/home/fbarbieri/deepbio/dataset/lfma/w2i"+data+".p"
+w2tfidf_file = "/home/fbarbieri/deepbio/dataset/lfma/w2tfidf.p"
 
 def tfidfVector(corpus):
 	#vectorizer = TfidfVectorizer(min_df=1, stop_words=None, strip_accents=unicode)
@@ -27,9 +27,9 @@ def tfidfVector(corpus):
 #---------------------------------------------------------------------
 
 if 'train' in dataset:
-	timelines = open("/home/fbarbieri/deepbio/dataset/timelines_train.txt", 'r').read().strip().split("\n")
-	timelinesPath = "/home/fbarbieri/deepbio/dataset/bios/train/"
-	h5_file = "/home/fbarbieri/deepbio/dataset/timelines_train"+data+".h5"
+	timelines = open("/home/fbarbieri/deepbio/dataset/lfma/timelines_train.txt", 'r').read().strip().split("\n")
+	timelinesPath = "/home/fbarbieri/deepbio/dataset/lfma/bios/"
+	h5_file = "/home/fbarbieri/deepbio/dataset/lfma/timelines_train"+data+".h5"
 
 	print "loading corpus to calculate tfidf"
 	corpus = []
@@ -60,8 +60,8 @@ elif 'test' in dataset:
 	w2tfidf = pickle.load(open(w2tfidf_file, "rb"))
 	i2w = pickle.load(open(i2w_file, "rb"))
 	w2i = pickle.load(open(w2i_file, "rb"))
-	timelines = open("/home/fbarbieri/deepbio/dataset/timelines_test.txt", 'r').read().strip().split("\n")
-	h5_file = "/home/fbarbieri/deepbio/dataset/timelines_test"+data+".h5"
+	timelines = open("/home/fbarbieri/deepbio/dataset/lfma/timelines_test.txt", 'r').read().strip().split("\n")
+	h5_file = "/home/fbarbieri/deepbio/dataset/lfma/timelines_test"+data+".h5"
 
 #create tensor for each user
 n_users = len(timelines)
