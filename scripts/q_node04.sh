@@ -20,7 +20,7 @@ export PROTOBUF_INCLUDE_DIR="/usr/include/google/protobuf"
 ########
 
 cd /homedtic/fbarbieri/git/deepbio
-th train1.lua -learning_rate 0.0001 -hidden_size 70000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
+th train3.lua -batch_size 200 -hidden_size 50000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
 #sleep 1
 #th train1.lua -learning_rate 0.00001 -hidden_size 5000 > ~/deepbio/logs/4_deepbio_$(date +%Y_%m_%d_%H_%M_%S) &
 #sleep 1

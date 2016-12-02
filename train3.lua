@@ -88,7 +88,7 @@ cmd:option('-beta',1,'beta for f_x')
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')
 cmd:option('-seed', 123, 'random number generator seed to use')
 cmd:option('-gpuid', 0, 'which gpu to use. -1 = use CPU')
-cmd:option('-print_every',500,'Print some statistics')
+cmd:option('-print_every',100,'Print some statistics')
 cmd:option('-revert_params',-1,'Reverst parameters if you are doing worse on the validation (in the last print_every*batch_size) elements')
 cmd:text()
 

@@ -94,3 +94,7 @@ e:0.53 (i:3500) train/val loss: 0.851816/0.857871 sim: 0.142129  bestSim: 0.1434
 lr= 1.0000e-04 grad norm = 2.5595e+01, param norm = 5.9388e+03, grad/param norm = 4.3098e-03	
 e:0.60 (i:4000) train/val loss: 0.838262/0.857040 sim: 0.142960  bestSim: 0.143476 batch/total time: 0.2480 / 16	
 lr= 1.0000e-04 grad norm = 2.5163e+01, param norm = 5.9389e+03, grad/param norm = 4.2369e-03	
+e:0.68 (i:4500) train/val loss: 0.853519/0.857178 sim: 0.142822  bestSim: 0.143476 batch/total time: 0.2395 / 18	
+lr= 1.0000e-04 grad norm = 2.8470e+01, param norm = 5.9390e+03, grad/param norm = 4.7937e-03	
+e:0.75 (i:5000) train/val loss: 0.832260/0.855795 sim: 0.144205  bestSim: 0.144205 batch/total time: 0.2395 / 20	
+lr= 1.0000e-04 grad norm = 2.2657e+01, param norm = 5.9391e+03, grad/param norm = 3.8149e-03	
