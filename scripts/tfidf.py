@@ -10,7 +10,7 @@ import string, re
 
 vocab_length = 200000 #150000 #100000
 max_timeline_word = 800 #800 #600 
-dataset = 'train' # test or train
+dataset = 'test' # test or train
 data = "_tfidf" #"_entities"
 i2w_file = "/home/fbarbieri/deepbio/dataset/lfma/i2w"+data+".p"
 w2i_file = "/home/fbarbieri/deepbio/dataset/lfma/w2i"+data+".p"

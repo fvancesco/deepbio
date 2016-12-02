@@ -83,8 +83,8 @@ cmd:option('-val_size', 1000, 'how many users to use for validation set')
 cmd:option('-test_size', 49988, 'how many users to use for the testing') --5528
 cmd:option('-save_checkpoint_every', 10000, 'how often to save a model checkpoint?')
 cmd:option('-checkpoint_path', 'cp/', 'folder to save checkpoints into (empty = this folder)')
-cmd:option('-output_path', '/home/fbarbieri/deepbio/out/', 'folder to save output vectors')
-cmd:option('-save_output', 0.25, 'save if > save_output and > bestCosine')
+cmd:option('-output_path', '../../deepbio/out/lfma/', 'folder to save output vectors')
+cmd:option('-save_output', 0.21, 'save if > save_output and > bestCosine')
 cmd:option('-beta',1,'beta for f_x')
 -- misc
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')

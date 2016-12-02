@@ -19,12 +19,17 @@ cmd:text()
 cmd:text('Options')
 
 -- Data input settings
-cmd:option('-input_h5_text','../../deepbio/dataset/timelines_train_tfidf.h5','path to the user tensors')
-cmd:option('-input_h5_text_test','../../deepbio/dataset/timelines_test_tfidf.h5','path to the user tensors - test set')
-cmd:option('-lookup_file','../../deepbio/dataset/lookup_tfidf.h5','path to gold factors')
-cmd:option('-tfidf_file','../../deepbio/dataset/tfidf.h5','path to gold factors')
+--cmd:option('-input_h5_text','../../deepbio/dataset/timelines_train_tfidf.h5','path to the user tensors')
+--cmd:option('-input_h5_text_test','../../deepbio/dataset/timelines_test_tfidf.h5','path to the user tensors - test set')
+--cmd:option('-lookup_file','../../deepbio/dataset/lookup_tfidf.h5','path to gold factors')
+--cmd:option('-tfidf_file','../../deepbio/dataset/tfidf.h5','path to gold factors')
+--cmd:option('-input_h5_factors','../../deepbio/dataset/factors_train.h5','path to gold factors we want to learn')
 
-cmd:option('-input_h5_factors','../../deepbio/dataset/factors_train.h5','path to gold factors we want to learn')
+cmd:option('-input_h5_text','../../deepbio/dataset/lfma/timelines_train_tfidf.h5','path to the user tensors')
+cmd:option('-input_h5_text_test','../../deepbio/dataset/lfma/timelines_test_tfidf.h5','path to the user tensors - test set')
+cmd:option('-lookup_file','../../deepbio/dataset/lfma/lookup_tfidf.h5','path to gold factors')
+cmd:option('-tfidf_file','../../deepbio/dataset/lfma/tfidf.h5','path to gold factors')
+cmd:option('-input_h5_factors','../../deepbio/dataset/lfma/factors_train.h5','path to gold factors we want to learn')
 
 cmd:option('-embedding_dim',300,'Pretrained Embedding size (dim of the lookup table)')
 cmd:option('-vocab_size',200000,'Size of the vcabulary (defined in the script create_tensor_timeline.py)')
@@ -71,13 +76,13 @@ cmd:option('-optim_epsilon',1e-8,'epsilon that goes into denominator for smoothi
 cmd:option('-weight_decay',0,'Weight decay for L2 norm')
 
 -- Evaluation/Checkpointing
-cmd:option('-train_size', 21113, 'how many users to use for training set')
+cmd:option('-train_size', 198957, 'how many users to use for training set')--21113
 cmd:option('-val_size', 1000, 'how many users to use for validation set')
-cmd:option('-test_size', 5528, 'how many users to use for the testing (the whole dataset to do some train eval. too)')
+cmd:option('-test_size', 49988, 'how many users to use for the testing')--5528
 cmd:option('-save_checkpoint_every', 10000, 'how often to save a model checkpoint?')
 cmd:option('-checkpoint_path', 'cp/', 'folder to save checkpoints into (empty = this folder)')
-cmd:option('-output_path', '/home/fbarbieri/deepbio/out/', 'folder to save output vectors')
-cmd:option('-save_output', 0.30, 'save if > save_output and > bestCosine')
+cmd:option('-output_path', '../../deepbio/out/lfma/', 'folder to save output vectors')
+cmd:option('-save_output', 0.20, 'save if > save_output and > bestCosine')
 cmd:option('-beta',1,'beta for f_x')
 -- misc
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')
