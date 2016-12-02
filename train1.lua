@@ -62,7 +62,7 @@ cmd:option('-dropouts', '{0.1, 0.1}', 'Dropout on hidden representations.')
 
 -- Optimization: General
 cmd:option('-max_iters', -1, 'max number of iterations to run for (-1 = run forever)')
-cmd:option('-batch_size',200,'what is the batch size in number of images per batch')
+cmd:option('-batch_size',100,'what is the batch size in number of images per batch')
 cmd:option('-batch_size_real',-1,'TODO REMOVE FROM HERE!!! real value of the batch with the negative examples')
 -- Optimization: for the model
 cmd:option('-dropout', -1, 'strength of dropout in the model')
@@ -84,7 +84,7 @@ cmd:option('-test_size', 49988, 'how many users to use for the testing') --5528
 cmd:option('-save_checkpoint_every', 10000, 'how often to save a model checkpoint?')
 cmd:option('-checkpoint_path', 'cp/', 'folder to save checkpoints into (empty = this folder)')
 cmd:option('-output_path', '../../deepbio/out/lfma/', 'folder to save output vectors')
-cmd:option('-save_output', 0.21, 'save if > save_output and > bestCosine')
+cmd:option('-save_output', -1, 'save if > save_output and > bestCosine')
 cmd:option('-beta',1,'beta for f_x')
 -- misc
 cmd:option('-id', 'idcp', 'an id identifying this run/job. used in cross-val and appended when writing progress files')
